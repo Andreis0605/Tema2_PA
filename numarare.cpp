@@ -5,7 +5,7 @@
 using namespace std;
 
 // function that counts all the paths found during a DFS traversal
-void dfs_count(int current, int stop, vector<vector<int>> graph, vector<bool> &visited, int &counter)
+/*void dfs_count(int current, int stop, vector<vector<int>> graph, vector<bool> &visited, int &counter)
 {
     if (current == stop)
     {
@@ -24,6 +24,45 @@ void dfs_count(int current, int stop, vector<vector<int>> graph, vector<bool> &v
             }
         }
     }
+}*/
+
+// function that returns a topological sorting of a graph as a vector
+// recerives the number of vertexes in a graph, the graph as an
+// adjency list and a vector that contains the in degree each vertex
+vector<int> toposort(int nr_vertexes, vector<vector<int>> graph,
+                     vector<int> in_degree)
+{
+
+    // initialize the structures for the sorting
+    vector<int> order;
+    queue<int> q;
+
+    // enqueue the vertexes that have no edegs that go into them
+    for (int i = 0; i < nr_vertexes; i++)
+    {
+        if (in_degree[i] == 0)
+            q.push(i);
+    }
+
+    // process the graph
+    while (!q.empty())
+    {
+        // dequeue an element from the queue
+        // and add it in the result
+        int vertex = q.front();
+        q.pop();
+        order.push_back(vertex);
+
+        // process the neighbours of the vertex (decrease their in degree)
+        for (auto &vert : graph[vertex])
+        {
+            in_degree[vert]--;
+            if (in_degree[vert] == 0)
+                q.push(vert);
+        }
+    }
+
+    return order;
 }
 
 int main()
@@ -39,8 +78,9 @@ int main()
 
     // declare the adjency lists for the two graphs
     vector<vector<int>> adj_list1(N + 2), adj_list2(N + 2);
+    vector<int> in_degree(N + 2, 0);
 
-    // 
+    //
 
     // read the first graph
     for (int i = 0; i < M; i++)
@@ -48,7 +88,6 @@ int main()
         int x, y;
         in >> x >> y;
         adj_list1[x].push_back(y);
-
     }
 
     // read the second graph
@@ -59,19 +98,30 @@ int main()
 
         // if we have an edge in the first graph, add it to the second one
         if (find(adj_list1[x].begin(), adj_list1[x].end(), y) != adj_list1[x].end())
+        {
             adj_list2[x].push_back(y);
+            in_degree[y]++;
+        }
     }
 
-    // define the elements needed for the dfs of the second graph
+    // generate the toposort of the second graph
+    vector<int> sorted = toposort(N, adj_list2, in_degree);
 
-    vector<bool> visited(N + 2, false);
-    stack<int> stack;
-    int counter = 0;
-    visited[1] = true;
+    // declare a vector to count the number of paths that go into each vertex
+    vector<unsigned long long> nr_paths(N + 2, 0);
 
-    dfs_count(1, N, adj_list2, visited, counter);
+    nr_paths[1] = 1;
 
-    out << counter;
+    for (auto &ver : sorted)
+    {
+        for (auto &child : adj_list2[ver])
+        {
+            nr_paths[child] += nr_paths[ver];
+            nr_paths[child] = nr_paths[child] % LIMIT;
+        }
+    }
+
+    out << nr_paths[N];
 
     return 0;
 }
