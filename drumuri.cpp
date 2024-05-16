@@ -40,14 +40,33 @@ vector<pair<int, int>> dijkstra(int start, vector<vector<pair<int, int>>> graph)
     return dij;
 }
 
+int get_edge_cost(int source, int dest, vector<vector<pair<int,int>>> graph)
+{
+    for(long unsigned int i = 0; i < graph[source].size(); i++)
+    {
+        if(graph[source][i].first == dest)
+        {
+            return graph[source][i].second;
+        }
+    }
+
+    return -1;
+}
+
 // function that removes the common edges from two paths that lead to the same vertex
-/*void remove_common_edges_from_sum(int source1, int source2, int dest,
-                                  int &sum, vector<pair<int, int>> dij_source1,
+void remove_common_edges_from_sum(int source1, int source2, int dest,
+                                  unsigned long long &sum, vector<pair<int, int>> dij_source1,
                                   vector<pair<int, int>> dij_source2,
                                   vector<vector<pair<int, int>>> graph)
 {
     int current = dest;
-}*/
+    while(dij_source1[current].second == dij_source2[current].second)
+    {
+        sum -= get_edge_cost(dij_source1[current].second, current, graph);
+        current = dij_source1[current].second;
+    }
+
+}
 
 int main()
 {
@@ -124,13 +143,16 @@ int main()
 
     out << "\n";*/
 
-    int minn = INT_MAX;
+    unsigned long long minn = ULLONG_MAX;
+    unsigned long long sum = 0;
 
     for (int i = 1; i <= N; i++)
     {
         if (dij_from_x[i].first != INT_MAX && dij_from_y[i].first != INT_MAX && dij_to_z[i].first != INT_MAX)
         {
-            minn = min(minn, dij_from_x[i].first + dij_from_y[i].first + dij_to_z[i].first);
+            sum = dij_from_x[i].first + dij_from_y[i].first + dij_to_z[i].first;
+            remove_common_edges_from_sum(x, y, i, sum, dij_from_x, dij_from_y, adj_list);
+            minn = min(minn, sum);
         }
     }
 
