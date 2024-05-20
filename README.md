@@ -45,16 +45,17 @@
 
 ### Principiu de rezolvare
 
-> 
+> Initial, citesc datele problemei si imi generez 2 grafuri: unul cu muchiile in sensul in care au fost date si unul cu muchiile in sens invers. Apoi aplic dijkstra din nodurile x si y pe graful cu muchiile in sens normal si pe graful invers plecand din z. Astfel, calculez distanta de la x la toate nodurile, de la y la toate nodurile si de la toate nodurile la z. Dupa aceea, caut nodurile in care converg drumul de la x la z si de la y la z, incercand astfel sa dirijez drumurile prin graf. Daca cele 2 drumuri converg in acel nod, verific daca costul acela este cel minim. La final, afisez costul minim.
 
 
 ### Functii declarate si folosite la rezolvarea problemei
 
 - `vector<pair<unsigned long long, int>> dijkstra(int start,vector<map<int, int>> graph)`
     > Functie care calculeaza distanta de la un un nod la toate nodurile din graf folosind dijkstra. Intoarce un vector cu distante si noduri parinte. Complexitatea acestei functii este O(E * logV).
+
 ### Complexitatea algoritmului
 
-> Fie N dimensiunea primului sir si M dimensiunea celui de-al doilea sir. Complexitatea citirii sirurilor este O(N + M). Complexitatea parcurgerii celor doi vectori este O(N + M). Complexitatea algoritmului este O(N + M).
+> Fie V numarul de noduri din graf si E numarul de muchii. Complexitatea citirii este O(E). Complexitatea aplicarii dijkstra pe graf este O(3 * E * logV) = O(E * logV). Calculul minimului se realizeaza in O(V). Complexitatea totala este O(E + E * logV + V) = O(E * logV).
 
 ## Problema 4: Scandal 
 
