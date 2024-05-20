@@ -2,8 +2,6 @@
 
 using namespace std;
 
-// https://www.geeksforgeeks.org/find-longest-path-directed-acyclic-graph/
-
 // function that returns a topological sorting of a graph as a vector
 // recerives the number of vertexes in a graph, the graph as an
 // adjency list and a vector that contains the in degree each vertex
