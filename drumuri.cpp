@@ -2,18 +2,22 @@
 
 using namespace std;
 
-
-vector<pair<unsigned long long, int>> dijkstra(int start, vector<map<int, int>> graph)
-{
+// function that implements the dijkstra algorithm
+// it recceives the start vertex and the graph and
+// returns a vector of pairs that contains the distance and the parent vertex
+// of each vertex
+vector<pair<unsigned long long, int>> dijkstra(int start,
+                                               vector<map<int, int>> graph) {
+    // declare the vector that will store the distances and the parent vertex
     vector<pair<unsigned long long, int>> dij(graph.size() + 1);
 
-    for (long unsigned int i = 0; i < graph.size() + 1; i++)
-    {
+    // initialize the distances and the parent vertex
+    for (long unsigned int i = 0; i < graph.size() + 1; i++) {
         dij[i].first = ULLONG_MAX;
         dij[i].second = -1;
     }
 
-    // declare the queue for the
+    // declare the queue for the algorithm
     queue<int> q;
 
     // initialize the first vertex and add it in the queue
@@ -21,67 +25,32 @@ vector<pair<unsigned long long, int>> dijkstra(int start, vector<map<int, int>> 
     dij[start].second = -1;
     q.push(start);
 
-    while (!q.empty())
-    {
+    // start processing the queue
+    while (!q.empty()) {
+        // get the first vertex from the queue
         int vertex = q.front();
         q.pop();
 
-        /*for (long unsigned int i = 0; i < graph[vertex].size(); i++)
-        {
-            if (dij[vertex].first + graph[vertex][i].second < dij[graph[vertex][i].first].first)
-            {
-                dij[graph[vertex][i].first].first = dij[vertex].first + graph[vertex][i].second;
-                dij[graph[vertex][i].first].second = vertex;
-
-                q.push(graph[vertex][i].first);
-            }
-        }*/
-
-        for(auto &elem : graph[vertex])
-        {
-            if (dij[vertex].first + (unsigned long long)elem.second < dij[elem.first].first)
-            {
+        // go through all the neighbours of the vertex
+        for (auto &elem : graph[vertex]) {
+            // if the distance to the neighbour is smaller
+            // than the current distance
+            if (dij[vertex].first + (unsigned long long)elem.second <
+                dij[elem.first].first) {
+                // update the distance and the parent vertex and
+                // add the neighbour in the queue
                 dij[elem.first].first = dij[vertex].first + elem.second;
                 dij[elem.first].second = vertex;
-
                 q.push(elem.first);
             }
         }
     }
 
+    // return the distances and the parent vertex vector
     return dij;
 }
 
-/*int get_edge_cost(int source, int dest, vector<vector<pair<int, int>>> graph)
-{
-    for (long unsigned int i = 0; i < graph[source].size(); i++)
-    {
-        if (graph[source][i].first == dest)
-        {
-            return graph[source][i].second;
-        }
-    }
-
-    return -1;
-}*/
-
-// function that removes the common edges from two paths that lead to the same vertex
-void remove_common_edges_from_sum(int source1, int source2, int dest,
-                                  unsigned long long &sum, vector<pair<unsigned long long, int>> dij_source1,
-                                  vector<pair<int, int>> dij_source2,
-                                  vector<map<int, int>> graph)
-{
-    int current = dest;
-    while (dij_source1[current].second == dij_source2[current].second)
-    {
-        sum -= graph[dij_source1[current].second][current];
-        current = dij_source1[current].second;
-    }
-}
-
-int main()
-{
-
+int main() {
     // open the files
     ifstream in("drumuri.in");
     ofstream out("drumuri.out");
@@ -90,83 +59,50 @@ int main()
     int N, M;
     in >> N >> M;
 
-    // declare the adjency list for the graph
+    // declare an adjency list for the graph and one for the reverse graph
     vector<map<int, int>> adj_list(N + 2), reverse_adj_list(N + 2);
 
     // read the graph
-    for (int i = 0; i < M; i++)
-    {
+    for (int i = 0; i < M; i++) {
         int x, y, z;
         in >> x >> y >> z;
         adj_list[x].insert({y, z});
+
+        // create the reevrse graph
         reverse_adj_list[y].insert({x, z});
     }
 
     // read the nodes in the problem
     int x, y, z;
     in >> x >> y >> z;
-    // out << x << " " << y << " " << z << "\n";
-
-    // sort the edges by cost for each vertex
-
-    /*for (int i = 1; i <= N; i++)
-    {
-        sort(adj_list[i].begin(), adj_list[i].end(), [](pair<int, int> a, pair<int, int> b)
-             { return a.second < b.second; });
-    }*/
-
-    // print the graph
-    /*for (int i = 1; i <= N; i++)
-    {
-        cout << i << ": ";
-        for (long unsigned int j = 0; j < adj_list[i].size(); j++)
-        {
-            cout << adj_list[i][j].first << " " << adj_list[i][j].second << " ";
-        }
-        cout << endl;
-    }*/
 
     // calculate the dijkstra for the x and y vertexes
     vector<pair<unsigned long long, int>> dij_from_x, dij_from_y, dij_to_z;
     dij_from_x = dijkstra(x, adj_list);
     dij_from_y = dijkstra(y, adj_list);
+
+    // calculate the dijkstra for the z vertex on the reversed graph
     dij_to_z = dijkstra(z, reverse_adj_list);
 
-    // print the dijkstra for the x ,y and z vertexes
-    /*for (int i = 1; i <= N; i++)
-    {
-        out << i << " " << dij_from_x[i].first << " " << dij_from_x[i].second << "\n";
-    }
-
-    out << "\n";
-
-    for (int i = 1; i <= N; i++)
-    {
-        out << i << " " << dij_from_y[i].first << " " << dij_from_y[i].second << "\n";
-    }
-
-    out << "\n";
-
-    for (int i = 1; i <= N; i++)
-    {
-        out << i << " " << dij_to_z[i].first << " " << dij_to_z[i].second << "\n";
-    }
-
-    out << "\n";*/
-
+    // calculate the minimum distance between the 3 vertexes
     unsigned long long minn = ULLONG_MAX;
     unsigned long long sum = 0;
 
-    for (int i = 1; i <= N; i++)
-    {
-        if (dij_from_x[i].first != ULLONG_MAX && dij_from_y[i].first != ULLONG_MAX && dij_to_z[i].first != ULLONG_MAX && dij_from_x[i].second != dij_from_y[i].second)
-        {
+    // force the way between x and y to go through each vertex in the graph
+    for (int i = 1; i <= N; i++) {
+        // if all the ways exist and the ways between x and y to z
+        // meet exactry at the vertex i
+        if (dij_from_x[i].first != ULLONG_MAX &&
+            dij_from_y[i].first != ULLONG_MAX &&
+            dij_to_z[i].first != ULLONG_MAX &&
+            dij_from_x[i].second != dij_from_y[i].second) {
+            // calculate the cost of the way and update the minimum
             sum = dij_from_x[i].first + dij_from_y[i].first + dij_to_z[i].first;
-            //remove_common_edges_from_sum(x, y, i, sum, dij_from_x, dij_from_y, adj_list);
             minn = min(minn, sum);
         }
     }
 
+    // print the cost of the minimum way
     out << minn;
 
     return 0;

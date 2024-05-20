@@ -8,23 +8,19 @@ using namespace std;
 // recerives the number of vertexes in a graph, the graph as an
 // adjency list and a vector that contains the in degree each vertex
 vector<int> toposort(int nr_vertexes, vector<vector<int>> graph,
-                     vector<int> in_degree)
-{
-
+                     vector<int> in_degree) {
     // initialize the structures for the sorting
     vector<int> order;
     queue<int> q;
 
     // enqueue the vertexes that have no edegs that go into them
-    for (int i = 0; i < nr_vertexes; i++)
-    {
+    for (int i = 0; i < nr_vertexes; i++) {
         if (in_degree[i] == 0)
             q.push(i);
     }
 
     // process the graph
-    while (!q.empty())
-    {
+    while (!q.empty()) {
         // dequeue an element from the queue
         // and add it in the result
         int vertex = q.front();
@@ -32,19 +28,18 @@ vector<int> toposort(int nr_vertexes, vector<vector<int>> graph,
         order.push_back(vertex);
 
         // process the neighbours of the vertex (decrease their in degree)
-        for (auto &vert : graph[vertex])
-        {
+        for (auto &vert : graph[vertex]) {
             in_degree[vert]--;
             if (in_degree[vert] == 0)
                 q.push(vert);
         }
     }
 
+    // return the topological order of the graph
     return order;
 }
 
-int main()
-{
+int main() {
     // open the files
     ifstream in("trenuri.in");
     ofstream out("trenuri.out");
@@ -53,7 +48,6 @@ int main()
     // between the names of a city and it's number
     map<string, int> translation;
     map<string, int>::iterator itr1, itr2;
-
     int counter = 0, N;
 
     // read the source and destination
@@ -65,6 +59,7 @@ int main()
     translation.insert(pair<string, int>(dest, 1));
     counter = 2;
 
+    // read the number of vertexes
     in.get();
     in >> N;
 
@@ -74,82 +69,59 @@ int main()
     // declare a vector to find the in degree of a vertex
     vector<int> in_degree(N + 1, 0);
 
-    for (int i = 0; i < N; i++)
-    {
+    // read the graph
+    for (int i = 0; i < N; i++) {
+        // translate the strings read from files to numbers
         in >> aux1 >> aux2;
         itr1 = translation.find(aux1);
-        if (itr1 == translation.end())
-        {
+        if (itr1 == translation.end()) {
             translation.insert(pair<string, int>(aux1, counter));
             counter++;
         }
 
         itr2 = translation.find(aux2);
-        if (itr2 == translation.end())
-        {
+        if (itr2 == translation.end()) {
             translation.insert(pair<string, int>(aux2, counter));
             counter++;
         }
 
-        adj_list[translation.find(aux1)->second].push_back(translation.find(aux2)->second);
+        // add the edge in the grapf
+        adj_list[translation.find(aux1)->second]
+            .push_back(translation.find(aux2)->second);
+
+        // increase the in degree of the destination of the edge
         in_degree[translation.find(aux2)->second]++;
     }
 
-    /*for (int i = 0; i < adj_list.size(); ++i)
-    {
-        out << "Node " << i << " connected to: ";
-        for (int j = 0; j < adj_list[i].size(); ++j)
-        {
-            out << adj_list[i][j] << " ";
-        }
-        out << endl;
-    }
-
-    for (int i = 0; i < in_degree.size(); ++i)
-    {
-        out << "In-degree of node " << i << ": " << in_degree[i] << endl;
-    }*/
-
+    // generate a topological sort of the graph
     vector<int> sorted = toposort(translation.size(), adj_list, in_degree);
+
+    // calculate the maximum distance using dynamic programming
+
+    // declare a vector for the maximum distances
     vector<int> distances(translation.size(), INT_MIN);
 
-    /*for(int i=0;i<sorted.size();i++)
-    {
-        out << sorted[i] << " ";
-    }*/
-
-    // out << "\n";
-
+    // base case for dp
     distances[0] = 0;
 
-    for (int i = 0; i < sorted.size(); i++)
-    {
-        if (distances[sorted[i]] != INT_MIN)
-        {
-            for (int j = 0; j < adj_list[sorted[i]].size(); j++)
-            {
-                if (distances[adj_list[sorted[i]][j]] < distances[sorted[i]] + 1)
-                    distances[adj_list[sorted[i]][j]] = distances[sorted[i]] + 1;
+    // go through each vertex in topological order
+    for (int i = 0; i < sorted.size(); i++) {
+        // find the vertexes that are alreay discovered
+        if (distances[sorted[i]] != INT_MIN) {
+            // go through their neighbours
+            for (int j = 0; j < adj_list[sorted[i]].size(); j++) {
+                // check if the path for the neighbour is longer
+                // if we go through the current vertex
+                if (distances[adj_list[sorted[i]][j]] <
+                    distances[sorted[i]] + 1)
+                    distances[adj_list[sorted[i]][j]] =
+                        distances[sorted[i]] + 1;
             }
         }
     }
 
+    // print the longest way for the destination vertex
     out << distances[1] + 1 << "\n";
 
-    /*for (int i = 0; i < adj_list.size(); ++i)
-    {
-        out << "Node " << i << " connected to: ";
-        for (int j = 0; j < adj_list[i].size(); ++j)
-        {
-            out << adj_list[i][j] << " ";
-        }
-        out << endl;
-    }*/
-
-    /*for(itr = translation.begin();itr!= translation.end();itr++)
-    {
-        out << itr->first << " " << itr->second << "\n";
-    }
-    */
     return 0;
 }
